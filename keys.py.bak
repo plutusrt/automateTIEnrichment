@@ -1,0 +1,14 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+misp_url = ''
+misp_key = '' # The MISP auth key can be found on the MISP web interface under the automation section
+misp_verifycert = False
+misp_client_cert = ''
+RiskIQUsername = ''
+RiskIQKey = ''
+RiskIQauth = (RiskIQUsername, RiskIQKey)
+RiskIQbase_url = 'https://api.riskiq.net/pt'
+RiskIQScore = 30
+URLScanAPIKey = "
+URLScanBaseURL = "https://urlscan.io/api/v1/search/?q="
