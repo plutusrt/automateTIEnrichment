@@ -13,28 +13,47 @@ def submitURL(url):
 
 def getInitialResults(url):
     payload = {}
-    headers = {'Content-Type': 'application/json'}
+    whitelist = ["stripe.com", "fonts.googleapis.com", "fonts.gstatic.com"]
+    results = {}
+    toRemove = []
+    headers = {'API-Key':keys.URLScanAPIKey, 'Content-Type': 'application/json'}
     response = requests.get(url, headers=headers)
     while (response.status_code == 404):
         time.sleep(10)
         response = requests.get(url, headers=headers)
     resultsFromURLScan = response.json()
-    return resultsFromURLScan['lists']['hashes']
+    for i in range(0,len(resultsFromURLScan['lists']['hashes'])):
+        try:
+            results[resultsFromURLScan['lists']['hashes'][i]] = resultsFromURLScan['lists']['urls'][i]
+        except:
+            if len(resultsFromURLScan['lists']['urls']) < i+1:
+                results[resultsFromURLScan['lists']['hashes'][i]] = ""
+    for k,v in results.items():
+        for item in whitelist:
+            if item in v:
+                toRemove.append(k)
+    for item in toRemove:
+        del results[item]
+    return results
 
 def extactDomains(hashes):
     domains = []
     url = keys.URLScanBaseURL + "hash:"
     payload = {}
-    headers = {'Content-Type': 'application/json'}
+    headers = {'API-Key':keys.URLScanAPIKey, 'Content-Type': 'application/json'}
     with open('output/domains.csv', 'w') as fp:
         csvWriter = csv.writer(fp)
-        for hash in hashes:
+        csvWriter.writerow(["hash", "url", "domain", "urlscan", "screenshot"])
+        for hash, scannedUrl in hashes.items():
             response = requests.get(url+hash, headers=headers)
-            resultsFromURLScan =  response.json()
-            for item in resultsFromURLScan['results']:
-                if item['task']['domain'] not in domains:
-                    csvWriter.writerow([item['task']['domain']])
-                    domains.append(item['task']['domain'])
+            try:
+                resultsFromURLScan = response.json()
+                for item in resultsFromURLScan['results']:
+                    if item['task']['domain'] not in domains:
+                        csvWriter.writerow([hash, scannedUrl, item['task']['domain'], item['result'], item['screenshot']])
+                        domains.append(item['task']['domain'])
+            except Exception as e:
+                print (str(e))
     return domains
 
 

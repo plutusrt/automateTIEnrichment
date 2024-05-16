@@ -1,12 +1,13 @@
 import json
 import csv
 import requests
-
+import byteTI
 import MISP
 import RiskIQ
+import VTP
 import URLScan
 import urllib3
-from pymisp import ExpandedPyMISP, MISPEvent
+#from pymisp import ExpandedPyMISP, MISPEvent
 
 resultsFromURLScan = {}
 domains = []
@@ -40,8 +41,10 @@ def writeResults(path):
 def checkResults(domains):
     results = {}
     for domain in domains:
-        result = RiskIQ.checkScore(domain)
-        if result != -1:
+        #result = RiskIQ.checkScore(domain)
+        result = byteTI.getURLRep(domain)
+        #result = VTP.getURLRep(domain)
+        if result > 0:
             results[domain] = result
     print(len(results))
     print(results)
@@ -55,5 +58,5 @@ def f(url):
     results = checkResults(domains)
     # Parse all responses and get all links and get TI from RiskIQ
     # write code to push to MISP
-    MISP.pushToMISP(url, results)
+    #MISP.pushToMISP(url, results)
     return results
