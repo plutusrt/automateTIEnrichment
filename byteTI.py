@@ -4,7 +4,8 @@ import keys
 def getURLRep(URL):
     results = -1
 
-    url = "http://bytetip-boe.bytedance.net/api/v1/domain/"+URL+"/aggregated_ioc"
+#    url = "http://bytetip-boe.bytedance.net/api/v1/domain/"+URL+"/aggregated_ioc"
+    url = "https://bytetip.byteintl.net/api/v1/domain/"+URL+"/aggregated_ioc"
     headers = {
         "accept": "application/json",
         "cti-token": keys.ByteTIAPI
@@ -17,7 +18,7 @@ def getURLRep(URL):
         if results:
             return 1
         else:
-            return results
+            return 0
     except Exception as e:
         print (str(textRepsponse))
     return results

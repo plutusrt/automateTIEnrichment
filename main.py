@@ -1,5 +1,7 @@
 import json
 import csv
+import os
+
 import requests
 import byteTI
 import MISP
@@ -39,20 +41,49 @@ def writeResults(path):
 
 
 def checkResults(domains):
+    #line = [hash, url, domain, urlscan, screenshot, ByteTI]
+
     results = {}
-    for domain in domains:
-        #result = RiskIQ.checkScore(domain)
-        result = byteTI.getURLRep(domain)
-        #result = VTP.getURLRep(domain)
-        if result > 0:
-            results[domain] = result
+    with open(os.path.join('output', 'domains.csv'), 'r') as fp:
+        with open(os.path.join('output', 'results.csv'), 'w') as fp2:
+            csvReader = csv.reader(fp)
+            csvWriter = csv.writer(fp2)
+            csvWriter.writerow(["hash","url","domain","urlscan","screenshot","ByteTI","VT"])
+            csvReader.__next__()
+            for line in csvReader:
+                # Checking in ByteTIP
+                byteTIRep = byteTI.getURLRep(line[2])
+                if byteTIRep <= 0:
+                    line[5] = "Clean"
+                if byteTIRep > 0:
+                    line[5] = "Malicious"
+                    results[line[2]] = line
+
+                # Checking Directly in VT
+                result = VTP.getURLRep(line[2])
+                if result <= 0:
+                    line[6] = "Clean"
+                if result > 0:
+                    line[6] = result
+                    results[line[2]] = line
+
+                csvWriter.writerow(line)
+
+            #for domain in domains:
+                #result = RiskIQ.checkScore(domain)
+                #result = byteTI.getURLRep(domain)
+            #    result = VTP.getURLRep(domain)
+
     print(len(results))
     print(results)
     return results
 
 def f(url):
     result = URLScan.submitURL(url)
-    hashes = URLScan.getInitialResults(result['api'])
+    try:
+        hashes = URLScan.getInitialResults(result['api'])
+    except KeyError as e:
+        return {}
     domains = URLScan.extactDomains(hashes)
 
     results = checkResults(domains)

@@ -43,14 +43,14 @@ def extactDomains(hashes):
     headers = {'API-Key':keys.URLScanAPIKey, 'Content-Type': 'application/json'}
     with open('output/domains.csv', 'w') as fp:
         csvWriter = csv.writer(fp)
-        csvWriter.writerow(["hash", "url", "domain", "urlscan", "screenshot"])
+        csvWriter.writerow(["hash", "url", "domain", "urlscan", "screenshot","ByteTI", "VT"])
         for hash, scannedUrl in hashes.items():
             response = requests.get(url+hash, headers=headers)
             try:
                 resultsFromURLScan = response.json()
                 for item in resultsFromURLScan['results']:
                     if item['task']['domain'] not in domains:
-                        csvWriter.writerow([hash, scannedUrl, item['task']['domain'], item['result'], item['screenshot']])
+                        csvWriter.writerow([hash, scannedUrl, item['task']['domain'], item['result'], item['screenshot'],"", ""])
                         domains.append(item['task']['domain'])
             except Exception as e:
                 print (str(e))
